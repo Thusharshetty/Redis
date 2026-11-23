@@ -1,0 +1,23 @@
+import express from "express";
+import Redis from 'ioredis';
+import mongoose from 'mongoose';
+
+const app = express();
+
+const redis = new Redis("redis://localhost:6379" || process.env.REDIS_URL);
+
+app.get("/redis", async (req, res) => {
+    const reply = await redis.ping();
+    res.json({ redis: reply });
+});
+app.get("/mongo", async (req, res) => {
+    const url = 'mongodb://localhost:27017/redis';
+    if (mongoose.connection.readyState === 0) {
+        await mongoose.connect(url);
+    }
+    res.json({ mongo: "connected", database: mongoose.connection.db.databaseName });
+});
+
+app.listen(3000, () => {
+    console.log("Server is running on the port number 3000");
+})
